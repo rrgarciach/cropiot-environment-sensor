@@ -25,13 +25,6 @@
 #define DHT_PIN D5
 #define DHT_TYPE DHT22
 
-WiFiClient wlanClient1;
-WiFiClient wlanClient2;
-WiFiClient wlanClient3;
-PubSubClient mqttClient1(wlanClient1);
-PubSubClient mqttClient2(wlanClient2);
-PubSubClient mqttClient3(wlanClient3);
-
 DHT dht(DHT_PIN, DHT_TYPE); // Initialize DHT sensor
 Adafruit_BMP085 bmp; // Initialize BMP180 sensor
 
@@ -48,12 +41,11 @@ void setup()
   Serial.println("Starting...");
 
   connectWiFi();
-  wlanClient1 = generateWiFiClient();
-  wlanClient2 = generateWiFiClient();
-  wlanClient3 = generateWiFiClient();
-  connectMQTT(mqttClient1);
-  connectMQTT(mqttClient2);
-  connectMQTT(mqttClient3);
+  connectMQTT();
+  Serial.print("DEVICE_NAME_MEM_ADDR: ");Serial.println(readMem(DEVICE_NAME_MEM_ADDR));
+  Serial.print("DEVICE_PASS_MEM_ADDR: ");Serial.println(readMem(DEVICE_PASS_MEM_ADDR));
+  Serial.print("MQTT_SERVER_MEM_ADDR: ");Serial.println(readMem(MQTT_SERVER_MEM_ADDR));
+  Serial.print("MQTT_KEY_MEM_ADDR: ");Serial.println(readMem(MQTT_KEY_MEM_ADDR));
 
   dht.begin();
   if (!bmp.begin())
@@ -62,11 +54,9 @@ void setup()
 
 void loop()
 {
-  reconnectMQTT(mqttClient1);
+  reconnectMQTT();
   readDHT22();
-  reconnectMQTT(mqttClient2);
   readMQ135();
-  reconnectMQTT(mqttClient3);
   readBMP180();
   delay(10*1000);
 }
@@ -83,7 +73,7 @@ void readDHT22() {
   Serial.println(" *C ");
 
   String message = "{\"temperature\": " + String(temperature) + ", \"humidity\": " + String(humidity) + "}";
-  mqttClient1.publish(TB_V1_TELEMETRY, message.c_str());
+  mqttClient.publish(TB_V1_TELEMETRY, message.c_str());
 }
 
 void readMQ135() {
@@ -93,7 +83,7 @@ void readMQ135() {
   Serial.println(" ppm");
 
   String message = "{\"ppm\": " + String(sensorValue, DEC) + "}";
-  mqttClient1.publish(TB_V1_TELEMETRY, message.c_str());
+  mqttClient.publish(TB_V1_TELEMETRY, message.c_str());
 }
 
 void readBMP180() {
@@ -108,6 +98,6 @@ void readBMP180() {
   Serial.print("Temperature: " + String(bt) + " *C ");
   Serial.println("Pressure at sealevel (calculated): " + String(dst) + " hPa ");
 
-  String message = "{\"pressure\": " + String(bp) + ", \"altitude\": " + String(ba) + ", \"temperature\": " + String(bt) + ", \"seaLevelPressure\": " + String(dst) + "}";
-  mqttClient1.publish(TB_V1_TELEMETRY, message.c_str());
+  String message = "{\"pressure\": " + String(bp) + ", \"altitude\": " + String(ba) + ", \"temperature2\": " + String(bt) + ", \"seaLevelPressure\": " + String(dst) + "}";
+  mqttClient.publish(TB_V1_TELEMETRY, message.c_str());
 }
