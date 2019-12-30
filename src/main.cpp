@@ -42,10 +42,6 @@ void setup()
 
   connectWiFi();
   connectMQTT();
-  Serial.print("DEVICE_NAME_MEM_ADDR: ");Serial.println(readMem(DEVICE_NAME_MEM_ADDR));
-  Serial.print("DEVICE_PASS_MEM_ADDR: ");Serial.println(readMem(DEVICE_PASS_MEM_ADDR));
-  Serial.print("MQTT_SERVER_MEM_ADDR: ");Serial.println(readMem(MQTT_SERVER_MEM_ADDR));
-  Serial.print("MQTT_KEY_MEM_ADDR: ");Serial.println(readMem(MQTT_KEY_MEM_ADDR));
 
   dht.begin();
   if (!bmp.begin())
@@ -54,6 +50,7 @@ void setup()
 
 void loop()
 {
+  reconnectWiFi();
   reconnectMQTT();
   readDHT22();
   readMQ135();
